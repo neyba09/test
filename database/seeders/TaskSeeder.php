@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use App\Models\Task;
 use Carbon\Carbon;
@@ -10,6 +11,8 @@ class TaskSeeder extends Seeder
 {
     public function run(): void
     {
+        $users = User::factory(5)->create();
+
         $tasks = [
             [
                 'title' => 'Купить молоко',
@@ -94,7 +97,7 @@ class TaskSeeder extends Seeder
         ];
 
         foreach ($tasks as $task) {
-            Task::create(array_merge($task, ['user_id' => 1])); // все задачи для пользователя id=1
+            Task::create(array_merge($task, ['user_id' => $users->random()->id]));
         }
     }
 }

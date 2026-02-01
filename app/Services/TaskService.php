@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Mail\TaskCreatedMail;
+use App\Mail\TaskOverdueMail;
 use App\Models\Task;
 use App\Models\User;
 use App\Repositories\TaskRepository;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -13,7 +15,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class TaskService
 {
-    public function __construct(protected TaskRepository $taskRepository) {}
+    public function __construct(protected TaskRepository $taskRepository)
+    {
+    }
 
     public function getTasks(int $userId, int $perPage = 10)
     {
@@ -74,5 +78,16 @@ class TaskService
         }
 
         $this->taskRepository->delete($task);
+    }
+
+    public function notifyOverdueTasks(): void
+    {
+        $tasks = $this->taskRepository->getOverdueTasks();
+
+        foreach ($tasks as $task) {
+            if ($task->user && $task->user->email) {
+                Mail::to($task->user->email)->send(new TaskOverdueMail($task));
+            }
+        }
     }
 }

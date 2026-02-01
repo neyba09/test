@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Task;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class TaskRepository
@@ -44,5 +45,12 @@ class TaskRepository
     public function delete(Task $task): void
     {
         $task->delete();
+    }
+
+    public function getOverdueTasks()
+    {
+        return Task::where('status', '!=', 'completed')
+            ->where('due_date', '<', Carbon::now())
+            ->get();
     }
 }

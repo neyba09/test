@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\TaskRequest;
-use App\Http\Resources\TaskCollection;
+use App\Http\Requests\TaskUpdateRequest;
 use App\Http\Resources\TaskResource;
 use App\Http\Resources\TaskSingleCollection;
 use App\Services\TaskService;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,21 +19,21 @@ class TaskController extends Controller
     {
     }
 
-    public function index(Request $request): TaskCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
         $tasks = $this->taskService->getTasks(Auth::id(), $request->query('per_page', 10));
 
-        return new TaskCollection($tasks);
+        return TaskResource::collection($tasks);
     }
 
-    public function show(int $id): TaskSingleCollection
+    public function show(int $id)
     {
         $task = $this->taskService->getTaskById(Auth::id(), $id);
 
         return new TaskSingleCollection(collect([$task]));
     }
 
-    public function create(TaskRequest $request): JsonResponse
+    public function store(TaskRequest $request): JsonResponse
     {
         $task = $this->taskService->createTask($request->validated(), Auth::user());
 
@@ -50,7 +51,7 @@ class TaskController extends Controller
         return response()->noContent();
     }
 
-    public function update(TaskRequest $request, int $id): JsonResponse
+    public function update(TaskUpdateRequest $request, int $id): JsonResponse
     {
         $task = $this->taskService->updateTask(Auth::id(), $id, $request->validated());
 
